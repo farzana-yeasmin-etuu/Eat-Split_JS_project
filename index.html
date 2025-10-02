@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <title>Eat & Split</title>
+  
+</head>
+<body class="flex flex-col justify-center items-center p-8">
+
+  <h1 class="text-[30px] font-bold mb-10 text-black">Eat and Split</h1>
+
+  <div class="flex justify-center h-[200px] w-[300px] rounded p-6 flex gap-15">
+    <!-- add friend -->
+    <div id="left">
+      <button id="openFormBtn"
+        class="font-bold items-center place-items-center px-4 py-2 rounded-lg bg-blue-300 text-black mt-12 ml-15">
+        Add Friend
+      </button>
+
+      <!-- Add Friend Form -->
+      <div id="friendForm" class=" w-[400px] hidden bg-white p-6 rounded mt-3">
+        <div class="mb-4">
+          <label class="block font-bold mb-1">Friend Name</label>
+          <input id="friendName" type="text"
+            class="w-full p-2 border rounded"
+            placeholder="Enter name"/>
+        </div>
+        <div class="mb-4">
+          <label class="block font-bold mb-1 ">Image URL</label>
+          <input id="friendImg" type="text"
+            class="w-full p-2 border rounded"
+            value="https://i.pravatar.cc/44"/>
+        </div>
+        <button id="confirmAdd"
+          class=" font-bold w-full bg-blue-300 text-black py-2 rounded">
+          Add
+        </button>
+        <button id="closeForm"
+          class="w-full bg-blue-300 text-black py-2 rounded font-bold mt-2">
+          Close
+        </button>
+      </div>
+    </div>
+
+    <!-- bill -->
+    <div>
+      <div id="splitSection"
+        class="hidden w-[400px] bg-white p-6 rounded shadow space-y-4">
+        <h2 class="text-xl font-bold text-black">SPLIT A BILL WITH FRIEND</h2>
+         <label for="">Bill value</label>
+        <input id="totalBill" type="number" min="0"
+          placeholder="0"
+          class="border px-2 py-1 w-full rounded"/>
+         <label for="">Your expense</label>
+        <input id="myShare" type="number" min="0"
+          placeholder="0"
+          class="border px-2 py-1 w-full rounded"/>
+        <label for="">Clark's expense</label>
+        <input id="otherShare" type="number" min="0"
+          placeholder="0"
+          class="border px-2 py-1 w-full rounded"/>
+        <label for="">Who is paying the bill</label>
+        <select id="payBill" class="border px-2 py-1 w-full rounded">
+          <option value="me">You</option>
+          <option value="friend">Friend</option>
+        </select>
+
+        <button id="calcSplit"
+          class="bg-blue-300 text-black font-bold px-4 py-2 rounded">
+          Split Bill
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const addBtn = document.querySelector("#openFormBtn");
+    const formBox = document.querySelector("#friendForm");
+    const closeBtn = document.querySelector("#closeForm");
+    const saveBtn = document.querySelector("#confirmAdd");
+    const left = document.querySelector("#left");
+    const billBox = document.querySelector("#splitSection");
+    let activeFriend = null;
+
+    // const member={
+    //     name:prompt()
+    //     image : "https://i.pravatar.cc/48?u=118836"
+    // }
+    // const addFri = document.getElementById("addFriend")
+    // const clickbtn = document.getElementById("clkbtn")
+    
+    // clickbtn.addEventListener("click",()=> {
+    //     const namee = document.createElement("p")
+    //     namee.innerText= prompt()
+    //     //namee.innerText=Image("https://i.pravatar.cc/48?u=118836")
+    //     //addFri.innerHTML = namee
+    //     addFri.appendChild(namee)
+
+
+
+    // });
+
+    // Add Form 
+    addBtn.onclick = () => {
+      formBox.classList.remove("hidden");
+      addBtn.classList.add("hidden");
+    };
+
+    // Close Form
+    closeBtn.onclick = () => {
+      formBox.classList.add("hidden");
+      addBtn.classList.remove("hidden");
+    };
+
+    //Add Friend
+    saveBtn.onclick = () => {
+      const nameVal = document.getElementById("friendName").value.trim();
+      const imgVal = document.getElementById("friendImg").value.trim();
+      if (!nameVal) return;
+      const card = document.createElement("div");
+      card.className = " bg-white p-2 rounded shadow mb-2 gap-8 flex items-center justify-between";
+
+      card.innerHTML = `
+        <div class="h-[100px] w-[300px] flex items-center space-x-2">
+          <img src="${imgVal}" class="w-10 h-10 rounded-full">
+          <div>
+            <p class="font-bold">${nameVal}</p>
+            <p id="note-${nameVal}" class="text-[15px] text-gray-600">You and  ${nameVal}   are even</p>
+          </div>
+        </div>
+        <button class="pickBtn bg-blue-400 text-black font-bold  px-3 py-1 rounded">Select</button>
+      `;
+
+
+      left.insertBefore(card, addBtn);
+
+      // Select
+      const pickBtn = card.querySelector(".pickBtn");
+      pickBtn.onclick = () => {
+        if (pickBtn.textContent === "Select") {
+          billBox.classList.remove("hidden");
+          activeFriend = nameVal;
+          pickBtn.textContent = "Close";
+          pickBtn.classList.replace("bg-blue-400", "bg-blue-500");
+        } else {
+          billBox.classList.add("hidden");
+          pickBtn.textContent = "Select";
+          pickBtn.classList.replace("bg-blue-500", "bg-blue-400");
+        }
+      };
+
+      // toggle
+      document.getElementById("friendName").value = "";
+      formBox.classList.add("hidden");
+      addBtn.classList.remove("hidden");
+    };
+
+    //Split Bill
+     document.querySelector("#calcSplit").onclick = () => {
+      const total = +document.getElementById("totalBill").value || 0;
+      const mine = +document.getElementById("myShare").value || 0;
+      let theirs = total - mine;
+      if (theirs < 0) theirs = 0;
+
+      document.getElementById("otherShare").value = theirs;
+
+      const noteEl = document.getElementById(`note-${activeFriend}`);
+
+      if (mine === theirs) {
+        noteEl.textContent = `You and ${activeFriend} are even.`;
+        noteEl.className = "text-[20px] text-black";
+      } else if (mine > theirs) {
+        noteEl.textContent = `${activeFriend} owes you ${mine - theirs}`;
+        noteEl.className = "text-[20px] text-green-800";
+      } else {
+        noteEl.textContent = `You owe ${activeFriend} ${theirs - mine}`;
+        noteEl.className = "text-[20px] text-slate-500 ";
+      }
+    };
+  </script>
+</body>
+</html>
+  
